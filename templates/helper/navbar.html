@@ -1,0 +1,106 @@
+ <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand fw-bold" href="{% url 'home' %}">CompraYa!</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">CATEGORÍA</a>
+                            
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="#!">TODO LOS PRODUCTOS</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                {% for category in categories %}
+                                <li><a class="dropdown-item" href="{% url 'category' category.name|slugify %}">{{ category.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    </ul>
+                
+
+             <!-- SEARCH CENTER -->
+            <form class="d-flex mx-lg-auto my-2 my-lg-0"
+                method="GET"
+                action="{% url 'product_search' %}"
+                style="max-width: 450px; width: 100%;">
+                <input
+                    class="form-control rounded-start"
+                    type="search"
+                    name="q"
+                    placeholder="Buscar productos..."
+                    value="{{ request.GET.q }}"
+                >
+                <button class="btn btn-outline-primary rounded-end" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>            
+
+
+             <!-- RIGHT MENU -->
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+
+                {% if user.is_authenticated %}
+                    <!-- USER DROPDOWN -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle fw-semibold" href="#"
+                           id="userDropdown" role="button"
+                           data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'update_user' %}">
+                                    <i class="bi bi-person"></i> Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'update_info' %}">
+                                    <i class="bi bi-gear"></i> Infomación Usuario
+                                </a>
+                            </li>
+
+                             <li>
+                                <a class="dropdown-item" href="{% url 'my_favorites' %}">
+
+                                   <i class="bi bi-heart-fill"></i> Favoritos
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                    <i class="bi bi-box-arrow-right"></i> Salir
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-outline-danger btn-sm" href="{% url 'login' %}">
+                            Acceso
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-danger btn-sm " href="{% url 'register' %}">
+                            Registro
+                        </a>
+                    </li>
+                {% endif %}
+
+   
+
+                <!-- CART -->
+                <li class="nav-item">
+                    <a href="{% url 'cart' %}" class="btn btn-outline-danger position-relative">
+                        <i class="bi bi-cart-fill"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle
+                                     badge rounded-pill bg-danger"
+                              id="cart_quantity">
+                            {{ cart|length }}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+                </div>
+            </div>
+        </nav>

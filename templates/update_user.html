@@ -1,0 +1,150 @@
+{% extends 'helper/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Encabezado -->
+            <div class="text-center mb-5">
+                <h1 class="display-6 fw-bold text-primary">Actualizar Perfil</h1>
+                <p class="text-muted">Modifica tu información personal y mantén tu perfil actualizado</p>
+            </div>
+
+            <!-- Mensajes -->
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center shadow-sm" role="alert">
+                            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill
+                                       {% elif message.tags == 'error' %}bi-exclamation-circle-fill
+                                       {% else %}bi-info-circle-fill{% endif %} me-2"></i>
+                            <div>{{ message }}</div>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4 p-md-5">
+                    <!-- Formulario -->
+                    <form method="POST" action="{% url 'update_user' %}" novalidate class="needs-validation">
+                        {% csrf_token %}
+                        
+                        {% if user_form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in user_form.non_field_errors %}
+                                    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            {% for field in user_form %}
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                                        {{ field.label }}
+                                        {% if field.field.required %}
+                                            <span class="text-danger">*</span>
+                                        {% endif %}
+                                    </label>
+                                    
+                                    <div class="input-group">
+                                        {{ field }}
+                                        {% if field.help_text %}
+                                            <span class="input-group-text" data-bs-toggle="tooltip" title="{{ field.help_text }}">
+                                                <i class="bi bi-question-circle"></i>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if field.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            <i class="bi bi-exclamation-circle me-1"></i>
+                                            {{ field.errors|striptags }}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if field.help_text and not field.errors %}
+                                        <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-grid gap-3 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
+                            
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sección de Seguridad -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">
+                        <i class="bi bi-shield-lock me-2"></i>Seguridad
+                    </h5>
+                    <p class="card-text text-muted mb-3">
+                        Mantén tu cuenta segura actualizando periódicamente tu contraseña.
+                    </p>
+                    <a href="{% url 'update_password' %}" class="btn btn-outline-danger">
+                        <i class="bi bi-key me-2"></i>Cambiar Contraseña
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos personalizados */
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .input-group-text {
+        background-color: transparent;
+        border-left: none;
+    }
+    
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    }
+</style>
+
+<!-- Script para tooltips de Bootstrap -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Añadir clases de Bootstrap a los campos del formulario
+        document.querySelectorAll('input, select, textarea').forEach(function(element) {
+            if (!element.classList.contains('form-control') && element.tagName !== 'BUTTON') {
+                element.classList.add('form-control');
+            }
+        });
+    });
+</script>
+{% endblock %}

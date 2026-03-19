@@ -1,3 +1,4 @@
+
 {% extends 'helper/base.html' %}
 
 {% block content %}
@@ -12,239 +13,77 @@
     </div>
 </header>
 
-<div class="container my-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8 col-xl-7">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-white border-0 pt-4 pb-3">
-                    <h3 class="text-center mb-0 fw-bold text-success">
-                        <i class="bi bi-person-plus-fill me-2"></i>Registro de Usuario
-                    </h3>
-                    <p class="text-center text-muted mb-0 mt-2 small">
-                        Completa todos los campos para crear tu cuenta
-                    </p>
-                </div>
-                
-                <div class="card-body p-4 p-md-5">
-                    <!-- Mensajes específicos del formulario -->
-                    {% if form.non_field_errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <strong>Error:</strong> {{ form.non_field_errors|striptags }}
+        <div class="col-md-6">
+
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                    {% endif %}
+                {% endfor %}
+            {% endif %}
 
-                    <form method="POST" novalidate class="needs-validation" id="registerForm">
-                        {% csrf_token %}
-                        
-                        <div class="row">
-                            <!-- Campos de información personal -->
-                            <div class="col-md-6 mb-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-success">
-                                    <i class="bi bi-person-vcard me-2"></i>Información Personal
-                                </h5>
-                                
-                                {% for field in form %}
-                                    {% if field.name in "username first_name last_name email" %}
-                                        <div class="mb-3">
-                                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
-                                                <i class="bi 
-                                                    {% if field.name == 'username' %}bi-person
-                                                    {% elif field.name == 'first_name' %}bi-person-badge
-                                                    {% elif field.name == 'last_name' %}bi-person-badge
-                                                    {% elif field.name == 'email' %}bi-envelope
-                                                    {% endif %}
-                                                    me-2"></i>
-                                                {{ field.label }}
-                                            </label>
-                                            
-                                            <div class="input-group input-group-lg">
-                                                <span class="input-group-text bg-light">
-                                                    <i class="bi 
-                                                        {% if field.name == 'username' %}bi-person
-                                                        {% elif field.name == 'first_name' %}bi-person-badge
-                                                        {% elif field.name == 'last_name' %}bi-person-badge
-                                                        {% elif field.name == 'email' %}bi-envelope
-                                                        {% endif %}
-                                                        text-secondary"></i>
-                                                </span>
-                                                {{ field }}
-                                            </div>
-                                            
-                                            {% if field.help_text %}
-                                                <div class="form-text text-muted small">
-                                                    <i class="bi bi-info-circle me-1"></i>{{ field.help_text|safe }}
-                                                </div>
-                                            {% endif %}
-                                            
-                                            {% if field.errors %}
-                                                <div class="alert alert-danger alert-dismissible fade show mt-2 small" role="alert">
-                                                    <i class="bi bi-x-circle-fill me-1"></i>
-                                                    {{ field.errors|striptags }}
-                                                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            
-                            <!-- Campos de seguridad -->
-                            <div class="col-md-6 mb-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-success">
-                                    <i class="bi bi-shield-lock me-2"></i>Seguridad
-                                </h5>
-                                
-                                {% for field in form %}
-                                    {% if field.name in "password1 password2" %}
-                                        <div class="mb-3">
-                                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
-                                                <i class="bi 
-                                                    {% if field.name == 'password1' %}bi-key
-                                                    {% elif field.name == 'password2' %}bi-key-fill
-                                                    {% endif %}
-                                                    me-2"></i>
-                                                {{ field.label }}
-                                            </label>
-                                            
-                                            <div class="input-group input-group-lg">
-                                                <span class="input-group-text bg-light">
-                                                    <i class="bi 
-                                                        {% if field.name == 'password1' %}bi-key
-                                                        {% elif field.name == 'password2' %}bi-key-fill
-                                                        {% endif %}
-                                                        text-secondary"></i>
-                                                </span>
-                                                {{ field }}
-                                                <button type="button"
-                                                        class="btn btn-outline-secondary border-start-0"
-                                                        onclick="togglePassword('{{ field.id_for_label }}')"
-                                                        title="Mostrar/Ocultar contraseña">
-                                                    <i class="bi bi-eye" id="eyeIcon{{ field.name }}"></i>
-                                                </button>
-                                            </div>
-                                            
-                                            {% if field.help_text %}
-                                                <div class="form-text text-muted small">
-                                                    <i class="bi bi-info-circle me-1"></i>{{ field.help_text|safe }}
-                                                </div>
-                                            {% endif %}
-                                            
-                                            {% if field.errors %}
-                                                <div class="alert alert-danger alert-dismissible fade show mt-2 small" role="alert">
-                                                    <i class="bi bi-x-circle-fill me-1"></i>
-                                                    {{ field.errors|striptags }}
-                                                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                <!-- Requisitos de contraseña (puedes personalizar esto) -->
-                                <div class="alert alert-info small">
-                                    <h6 class="alert-heading">
-                                        <i class="bi bi-shield-check me-1"></i>Requisitos de contraseña:
-                                    </h6>
-                                    <ul class="mb-0 ps-3">
-                                        <li>Mínimo 8 caracteres</li>
-                                        <li>Al menos una letra mayúscula</li>
-                                        <li>Al menos un número</li>
-                                        <li>Al menos un carácter especial</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Términos y condiciones -->
-                        <div class="mb-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="acceptTerms" required>
-                                <label class="form-check-label small" for="acceptTerms">
-                                    Acepto los <a href="#" class="text-decoration-none">Términos y Condiciones</a> 
-                                    y la <a href="#" class="text-decoration-none">Política de Privacidad</a>
-                                </label>
-                                <div class="invalid-feedback">
-                                    Debes aceptar los términos y condiciones para continuar
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botón de registro -->
-                        <div class="d-grid gap-2 mb-4">
-                            <button type="submit" class="btn btn-success btn-lg fw-bold py-3" id="submitBtn">
-                                <i class="bi bi-person-plus me-2"></i>Crear mi cuenta
-                            </button>
-                        </div>
-
-                        <!-- Separador -->
-                        <div class="position-relative my-4">
-                            <hr>
-                            <div class="position-absolute top-50 start-50 translate-middle px-3 bg-white">
-                                <span class="text-muted">¿Ya tienes cuenta?</span>
-                            </div>
-                        </div>
-
-                        <!-- Enlace a login -->
-                        <div class="text-center">
-                            <p class="mb-0">
-                                <i class="bi bi-arrow-left me-1"></i>
-                                ¿Ya tienes una cuenta? 
-                                <a href="{% url 'login' %}" class="text-decoration-none fw-bold text-success">
-                                    Inicia sesión aquí
-                                </a>
-                            </p>
-                        </div>
-                    </form>
-                </div>
+            <!-- Formulario -->
+            <form method="POST" id="registerForm" novalidate>
+                {% csrf_token %}
+                {{ form.non_field_errors }}
                 
-                <!-- Footer de la tarjeta -->
-                <div class="card-footer bg-light border-0 text-center py-3">
-                    <small class="text-muted">
-                        <i class="bi bi-shield-check me-1"></i>
-                        Tus datos están protegidos con encriptación SSL de 256 bits
-                    </small>
-                </div>
-            </div>
-            
-            <!-- Información adicional -->
-            <div class="text-center mt-4">
-                <div class="alert alert-success bg-opacity-10 border-success" role="alert">
-                    <h6 class="alert-heading mb-2">
-                        <i class="bi bi-check-circle-fill me-2"></i>Beneficios de registrarte
-                    </h6>
-                    <div class="row small">
-                        <div class="col-md-4 mb-2">
-                            <i class="bi bi-truck me-1"></i> Envíos más rápidos
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <i class="bi bi-percent me-1"></i> Descuentos exclusivos
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <i class="bi bi-heart me-1"></i> Lista de favoritos
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <i class="bi bi-clock-history me-1"></i> Historial de compras
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <i class="bi bi-bell me-1"></i> Notificaciones personalizadas
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <i class="bi bi-star me-1"></i> Programa de recompensas
-                        </div>
+                {% for field in form %}
+                    <div class="mb-3">
+                        {{ field.label_tag }}
+                        
+                        <!-- Detectar si es campo de contraseña -->
+                        {% if "password" in field.name|lower %}
+                            <div class="input-group">
+                                {{ field }}
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('{{ field.id_for_label }}')">
+                                    <i class="bi bi-eye" id="eyeIcon{{ field.id_for_label }}"></i>
+                                </button>
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                        
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
                     </div>
-                </div>
+                {% endfor %}
+                
+                <button type="submit" id="submitBtn" class="btn btn-success w-100 mt-3 py-3 fw-bold">
+                    <i class="bi bi-person-plus-fill me-2"></i>Registrar
+                </button>
+            </form>
+            
+            <!-- Enlace para iniciar sesión -->
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    ¿Ya tienes una cuenta? 
+                    <a href="{% url 'login' %}" class="text-success text-decoration-none fw-bold">
+                        Inicia Sesión
+                    </a>
+                </p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Función para mostrar/ocultar contraseña
+// Función mejorada para mostrar/ocultar contraseña
 function togglePassword(fieldId) {
+    // Obtener el elemento del input
     const input = document.getElementById(fieldId);
-    const eyeIcon = document.getElementById('eyeIcon' + fieldId);
+    // Buscar el icono dentro del botón
+    const button = event.currentTarget;
+    const eyeIcon = button.querySelector('i');
     
     if (!input || !eyeIcon) return;
     
@@ -252,16 +91,45 @@ function togglePassword(fieldId) {
         input.type = "text";
         eyeIcon.classList.remove("bi-eye");
         eyeIcon.classList.add("bi-eye-slash");
+        button.setAttribute('title', 'Ocultar contraseña');
     } else {
         input.type = "password";
         eyeIcon.classList.remove("bi-eye-slash");
         eyeIcon.classList.add("bi-eye");
+        button.setAttribute('title', 'Mostrar contraseña');
     }
 }
 
-// Validación de formulario
+// Inicialización al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar clases de Bootstrap a los campos del formulario
+    const inputs = document.querySelectorAll('#registerForm input, #registerForm select, #registerForm textarea');
+    
+    inputs.forEach(input => {
+        if (!input.classList.contains('form-control') && input.type !== 'checkbox' && input.type !== 'hidden') {
+            input.classList.add('form-control', 'form-control-lg');
+        }
+        if (input.type === 'checkbox') {
+            input.classList.add('form-check-input');
+        }
+    });
+
+    // Agregar tooltips a los botones de mostrar contraseña
+    document.querySelectorAll('.btn-outline-secondary').forEach(btn => {
+        btn.setAttribute('title', 'Mostrar contraseña');
+    });
+
+    // Autofocus en el primer campo
+    const firstInput = document.querySelector('#registerForm input:not([type=hidden])');
+    if (firstInput) {
+        firstInput.focus();
+    }
+});
+
+// Validación del formulario
 (function() {
     'use strict';
+    
     const form = document.getElementById('registerForm');
     const submitBtn = document.getElementById('submitBtn');
     
@@ -271,58 +139,44 @@ function togglePassword(fieldId) {
                 event.preventDefault();
                 event.stopPropagation();
                 
-                // Agregar clases de validación a los campos
-                const inputs = form.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    if (!input.checkValidity()) {
-                        input.classList.add('is-invalid');
-                    }
-                });
+                // Encontrar el primer campo inválido y hacer scroll hacia él
+                const invalidInput = form.querySelector(':invalid');
+                if (invalidInput) {
+                    invalidInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                // Deshabilitar botón si el formulario es válido
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        Creando cuenta...
+                    `;
+                }
             }
+            
             form.classList.add('was-validated');
         }, false);
         
-        // Remover clases de error cuando el usuario empieza a escribir
-        form.querySelectorAll('input').forEach(input => {
+        // Validación en tiempo real
+        form.querySelectorAll('input, select, textarea').forEach(input => {
             input.addEventListener('input', function() {
                 if (this.classList.contains('is-invalid')) {
                     this.classList.remove('is-invalid');
                 }
+                if (this.checkValidity()) {
+                    this.classList.add('is-valid');
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.checkValidity() && this.value !== '') {
+                    this.classList.add('is-invalid');
+                }
             });
         });
     }
-    
-    // Deshabilitar botón después de hacer clic para evitar doble envío
-    if (submitBtn) {
-        submitBtn.addEventListener('click', function(e) {
-            const form = document.getElementById('registerForm');
-            if (form && form.checkValidity()) {
-                this.disabled = true;
-                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Creando cuenta...';
-            }
-        });
-    }
 })();
-
-// Agregar clases de Bootstrap a los campos del formulario
-document.addEventListener('DOMContentLoaded', function() {
-    // Agregar clases a todos los inputs del formulario
-    const inputs = document.querySelectorAll('#registerForm input, #registerForm select, #registerForm textarea');
-    inputs.forEach(input => {
-        if (!input.classList.contains('form-control') && input.type !== 'checkbox') {
-            input.classList.add('form-control', 'form-control-lg');
-        }
-        if (input.type === 'checkbox') {
-            input.classList.add('form-check-input');
-        }
-    });
-    
-    // Autofocus en el primer campo
-    const firstInput = document.querySelector('#registerForm input');
-    if (firstInput) {
-        firstInput.focus();
-    }
-});
 </script>
 
 <!-- Estilos adicionales -->
@@ -336,13 +190,31 @@ document.addEventListener('DOMContentLoaded', function() {
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     }
     
-    .input-group-text {
+    /* Estilo mejorado para el grupo de input con botón */
+    .input-group {
+        position: relative;
+    }
+    
+    .input-group .btn-outline-secondary {
+        border-color: #dee2e6;
+        background-color: white;
         transition: all 0.3s ease;
     }
     
-    .input-group:focus-within .input-group-text {
+    .input-group .btn-outline-secondary:hover {
         background-color: #f8f9fa;
         border-color: #198754;
+        color: #198754;
+    }
+    
+    .input-group .btn-outline-secondary:focus {
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+        border-color: #198754;
+    }
+    
+    /* Campos del formulario */
+    .form-control {
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
     
     .form-control:focus {
@@ -350,28 +222,93 @@ document.addEventListener('DOMContentLoaded', function() {
         box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
     }
     
+    /* Validación visual */
+    .form-control.is-valid {
+        border-color: #198754;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    /* Botón principal */
     .btn-success {
         background: linear-gradient(135deg, #198754 0%, #157347 100%);
         border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-success::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn-success:hover:not(:disabled)::after {
+        width: 300px;
+        height: 300px;
     }
     
     .btn-success:hover:not(:disabled) {
         background: linear-gradient(135deg, #157347 0%, #0f5c3a 100%);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4);
+        box-shadow: 0 4px 15px rgba(25, 135, 84, 0.4);
     }
     
-    a.text-success:hover {
-        text-decoration: underline !important;
+    /* Iconos de Bootstrap Icons (si no los tienes incluidos) */
+    @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+    
+    /* Animaciones */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
     }
     
-    .alert-danger .btn-close-sm {
-        padding: 0.25rem;
-        font-size: 0.75rem;
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
-    .border-bottom {
-        border-bottom: 2px solid #198754 !important;
+    /* Tooltips personalizados */
+    [title] {
+        position: relative;
+        cursor: pointer;
+    }
+    
+    [title]:hover::before {
+        content: attr(title);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 4px 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        font-size: 12px;
+        border-radius: 4px;
+        white-space: nowrap;
+        z-index: 1000;
     }
 </style>
 {% endblock %}

@@ -211,6 +211,7 @@ def register_user(request):
             messages.success(request, f'✅ Usuario {username} registrado y logueado correctamente.')
             return redirect('home')
         else:
+            print(form.errors)
             messages.error(request, '❌ Revisa los campos, hay errores en el formulario.')
     else:
         form = SignUpForm()

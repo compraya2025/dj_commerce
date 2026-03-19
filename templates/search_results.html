@@ -1,0 +1,39 @@
+{% extends 'helper/base.html' %}
+{% load price_filters %}
+
+{% block content %}
+
+<div class="container my-5">
+    <h3 class="mb-4">
+        Resultados para: <strong>"{{ query }}"</strong>
+    </h3>
+
+    {% if products %}
+        <div class="row">
+            {% for product in products %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ product.url_image_one_product.url }}" class="card-img-top" alt="{{ product.title }}">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ product.title }}</h6>
+                            <p class="fw-bold text-success">
+                                GS  {{ product.price|guarani }}
+                            </p>
+                        </div>
+                        <div class="card-footer text-center">
+                            <a href="{% url 'products' product.uid %}" class="btn btn-sm btn-outline-primary">
+                                Ver producto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            No se encontraron productos.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

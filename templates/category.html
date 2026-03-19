@@ -1,0 +1,318 @@
+{% extends 'helper/base.html' %}
+
+{% load price_filters %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+    <!-- Breadcrumb y encabezado -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Encabezado de categoría -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mb-lg-5">
+        <div>
+            <h1 class="h2 mb-2">{{ category.name }}</h1>
+            <p class="text-muted mb-0">{{ products|length }} productos disponibles</p>
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-sort-down me-2"></i>Ordenar por
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="?sort=price_asc">Precio: Menor a mayor</a></li>
+                <li><a class="dropdown-item" href="?sort=price_desc">Precio: Mayor a menor</a></li>
+                <li><a class="dropdown-item" href="?sort=name_asc">Nombre: A-Z</a></li>
+                <li><a class="dropdown-item" href="?sort=name_desc">Nombre: Z-A</a></li>
+                <li><a class="dropdown-item" href="?sort=discount">Mejores descuentos</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Grid de productos -->
+    {% if products %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for product in products %}
+            <div class="col">
+                <div class="card product-card h-100 border-0 shadow-sm hover-shadow">
+                    <!-- Badge de descuento -->
+                    {% if product.discount_percentage %}
+                    <div class="product-badge position-absolute top-0 start-0 m-2">
+                        <span class="badge bg-danger rounded-pill px-3 py-2">
+                            <i class="bi bi-tag-fill me-1"></i>-{{ product.discount_percentage|default:"25" }}%
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Imagen del producto -->
+                    <div class="product-image-wrapper position-relative overflow-hidden rounded-top">
+                        <img src="{{ product.url_image_one_product.url }}" 
+                             class="card-img-top product-image" 
+                             alt="{{ product.title }}"
+                             loading="lazy">
+                        <!-- Overlay de acciones -->
+                        <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                            <div class="action-buttons">
+                                <a href="{% url 'products' product.uid %}" 
+                                   class="btn btn-primary btn-sm rounded-pill px-3 mb-2">
+                                    <i class="bi bi-eye me-1"></i>Vista rápida
+                                </a>
+                                <br>
+                                <button class="btn btn-outline-light btn-sm rounded-pill px-3 add-to-cart" 
+                                        data-product-id="{{ product.id }}">
+                                    <i class="bi bi-cart-plus me-1"></i>Añadir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenido de la tarjeta -->
+                    <div class="card-body d-flex flex-column p-3">
+                        <!-- Categoría -->
+                        <div class="mb-2">
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-tag me-1"></i>{{ product.category|default:category.name }}
+                            </span>
+                        </div>
+
+                        <!-- Título -->
+                        <h5 class="card-title product-title mb-2">
+                            <a href="{% url 'products' product.uid %}" class="text-decoration-none text-dark">
+                                {{ product.title|truncatechars:50 }}
+                            </a>
+                        </h5>
+
+                        <!-- Descripción corta -->
+                        {% if product.description %}
+                        <p class="card-text text-muted small mb-3 flex-grow-1">
+                            {{ product.description|truncatechars:80 }}
+                        </p>
+                        {% endif %}
+
+                        <!-- Precios -->
+                        <div class="mt-auto">
+                            <div class="d-flex align-items-center mb-2">
+                                {% if product.discount_percentage %}
+                                    <strike class="text-muted small me-2">
+                                        GS {{ product.price|guarani }}
+                                    </strike>
+                                {% endif %}
+                                <span class="h5 mb-0 text-success">
+                                    GS 
+                                    {% if product.discount_percentage %}
+                                        {% with discounted_price=product.price|multiply_by:product.discount_percentage|divide_by:100 %}
+                                            {{ product.price|subtract:discounted_price|guarani }}
+                                        {% endwith %}
+                                    {% else %}
+                                        {{ product.price|guarani }}
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <!-- Rating (si existe) -->
+                            {% if product.rating %}
+                            <div class="small text-warning mb-3">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= product.rating %}
+                                        <i class="bi bi-star-fill"></i>
+                                    {% else %}
+                                        <i class="bi bi-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="text-muted ms-1">({{ product.review_count|default:"0" }})</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Botón principal -->
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'products' product.uid %}" 
+                               class="btn btn-danger btn-sm">
+                                <i class="bi bi-eye me-1"></i>Ver detalle completo
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm add-to-cart" 
+                                    data-product-id="{{ product.id }}">
+                                <i class="bi bi-cart-plus me-1"></i>Añadir al carrito
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Footer adicional -->
+                    <div class="card-footer bg-transparent border-top-0 pt-0">
+                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                            <span>
+                                <i class="bi bi-box-seam me-1"></i>
+                                {% if product.stock > 0 %}
+                                    {{ product.stock }} disponibles
+                                {% else %}
+                                    <span class="text-danger">Agotado</span>
+                                {% endif %}
+                            </span>
+                            <span>
+                                <i class="bi bi-truck me-1"></i>
+                                {% if product.free_shipping %}Envío gratis{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <nav aria-label="Paginación de productos" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    {% else %}
+        <!-- Estado vacío -->
+        <div class="text-center py-5 my-5">
+            <div class="empty-state-icon mb-4">
+                <i class="bi bi-box-seam display-1 text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">No hay productos en esta categoría</h3>
+            <p class="text-muted mb-4">Pronto añadiremos nuevos productos a {{ category.name }}</p>
+            <a href="{% url 'categorias' %}" class="btn btn-primary">
+                <i class="bi bi-arrow-left me-2"></i>Volver a categorías
+            </a>
+        </div>
+    {% endif %}
+    <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+</div>
+
+<!-- Estilos personalizados -->
+
+<style>
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+    }
+    
+    .product-image-wrapper {
+        height: 220px;
+        background-color: #f8f9fa;
+    }
+    
+    .product-image {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+    
+    .product-overlay {
+        background: rgba(0,0,0,0.7);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+    
+    .action-buttons {
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover .action-buttons {
+        transform: translateY(0);
+    }
+    
+    .product-title:hover {
+        color: #dc3545 !important;
+    }
+    
+    .hover-shadow {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .empty-state-icon {
+        opacity: 0.5;
+    }
+    
+    .breadcrumb {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .badge.bg-light {
+        border: 1px solid #dee2e6;
+    }
+</style>
+
+<!-- Script para interacción -->
+<script>
+document.querySelectorAll(".add-to-cart").forEach(btn => {
+    btn.addEventListener("click", function () {
+        const productId = this.dataset.productId;
+        const csrf = document.getElementById("csrf_token").value;
+        const button = this;
+        console.log("CLICK:", productId);
+
+        fetch("{% url 'add' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrf,
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `product_id=${productId}&product_qty=1`
+})
+        .then(res => res.json())
+        .then(data => {
+            if (data.qty) {
+                button.innerHTML = "✔ Agregado";
+                button.classList.remove("btn-outline-secondary");
+                button.classList.add("btn-success");
+
+                document.querySelector(".cart-count").innerText = data.qty;
+            }
+        })
+        .catch(err => console.log(err));
+    });
+});
+</script>
+{% endblock %}

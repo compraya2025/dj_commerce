@@ -1,0 +1,733 @@
+{% extends 'helper/base.html' %}
+{% load price_filters cart_extrags %}
+
+{% block content %}
+<!-- Hero Header -->
+<header class="bg-gradient-primary text-white py-5">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-transparent mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white-50">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="#" class="text-white-50">Productos</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{{ products.title|truncatechars:40 }}</li>
+            </ol>
+        </nav>
+    </div>
+</header>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Columna izquierda: Imágenes -->
+        <div class="col-lg-7">
+            <div class="product-gallery">
+                <!-- Imagen principal -->
+                <div class="main-image mb-4">
+                    <div class="position-relative rounded-4 overflow-hidden shadow-lg">
+                        {% if products.url_image_one_product %}
+                        <img src="{{ products.url_image_one_product.url }}" 
+                             class="img-fluid w-100" 
+                             alt="{{ products.title }}"
+                             id="mainImage"
+                             style="height: 500px; object-fit: contain; background: #f8f9fa;">
+                        {% endif %}
+                        
+                        <!-- Badges -->
+                        <div class="position-absolute top-0 start-0 p-3">
+                            {% if products.promotion and products.sale_price %}
+                            <span class="badge bg-danger fs-6 py-2 px-3">
+                                <i class="bi bi-percent me-1"></i>OFERTA ESPECIAL
+                            </span>
+                            {% endif %}
+                            {% if products.is_new %}
+                            <span class="badge bg-success fs-6 py-2 px-3 mt-2">
+                                <i class="bi bi-star me-1"></i>NUEVO
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Botón de zoom -->
+                        <button type="button" class="btn btn-light position-absolute top-0 end-0 m-3 rounded-circle shadow-sm"
+                                id="zoomBtn" style="width: 50px; height: 50px;">
+                            <i class="bi bi-zoom-in fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Galería de miniaturas -->
+                <div class="thumbnail-gallery">
+                    <div class="row g-2">
+                        {% if products.url_image_one_product %}
+                        <div class="col-3">
+                            <div class="thumbnail-item active rounded-3 overflow-hidden cursor-pointer"
+                                 data-image="{{ products.url_image_one_product.url }}">
+                                <img src="{{ products.url_image_one_product.url }}" 
+                                     class="img-fluid w-100" 
+                                     alt="Miniatura 1"
+                                     style="height: 100px; object-fit: cover;">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if products.url_image_two_product %}
+                        <div class="col-3">
+                            <div class="thumbnail-item rounded-3 overflow-hidden cursor-pointer"
+                                 data-image="{{ products.url_image_two_product.url }}">
+                                <img src="{{ products.url_image_two_product.url }}" 
+                                     class="img-fluid w-100" 
+                                     alt="Miniatura 2"
+                                     style="height: 100px; object-fit: cover;">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if products.url_image_three_product %}
+                        <div class="col-3">
+                            <div class="thumbnail-item rounded-3 overflow-hidden cursor-pointer"
+                                 data-image="{{ products.url_image_three_product.url }}">
+                                <img src="{{ products.url_image_three_product.url }}" 
+                                     class="img-fluid w-100" 
+                                     alt="Miniatura 3"
+                                     style="height: 100px; object-fit: cover;">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if not products.url_image_two_product and not products.url_image_three_product %}
+                        <!-- Placeholder si no hay más imágenes -->
+                        <div class="col-9">
+                            <div class="bg-light rounded-3 p-4 text-center text-muted">
+                                <i class="bi bi-images display-6 d-block mb-2"></i>
+                                <small>No hay más imágenes disponibles</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Columna derecha: Información del producto -->
+        <div class="col-lg-5">
+            <div class="product-details">
+                <!-- Título y SKU -->
+                <div class="mb-4">
+                    <h1 class="fw-bold display-6 mb-2">{{ products.title }}</h1>
+                    <div class="d-flex align-items-center gap-4 text-muted">
+                        <small>
+                            <i class="bi bi-upc-scan me-1"></i>
+                            SKU: <strong>{{ products.sku|default:"N/A" }}</strong>
+                        </small>
+                        <small>
+                            <i class="bi bi-tag me-1"></i>
+                            Marca: <strong>{{ products.brand|default:"Genérica" }}</strong>
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Rating y reviews -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rating text-warning me-2">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
+                        <span class="text-muted">(4.5/5 • 128 reviews)</span>
+                    </div>
+                    <div class="availability mb-3">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                            <i class="bi bi-check-circle-fill me-1"></i>En stock • Disponible
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Precio -->
+                <div class="price-section mb-4">
+                    {% if products.promotion and products.sale_price %}
+                    <div class="d-flex align-items-center mb-2">
+                        <h2 class="fw-bold text-danger display-5 mb-0">
+                            GS {{ products.sale_price|guarani }}
+                        </h2>
+                        <span class="badge bg-danger bg-opacity-10 text-danger fs-6 ms-3">
+                            -{{ products.discount_percentage|default:"25" }}%
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted text-decoration-line-through fs-5">
+                            GS {{ products.price|guarani }}
+                        </span>
+                        <span class="text-success fs-6 ms-3">
+                            <i class="bi bi-arrow-down me-1"></i>
+                            Ahorras GS {{ products.price|subtract:products.sale_price|guarani }}
+                        </span>
+                    </div>
+                    {% else %}
+                    <h2 class="fw-bold text-dark display-5 mb-0">
+                        GS {{ products.price|guarani }}
+                    </h2>
+                    {% endif %}
+                </div>
+                
+                <!-- Descripción corta -->
+                <div class="short-description mb-4">
+                    <h5 class="fw-bold mb-3">Descripción rápida</h5>
+                    <p class="text-muted">
+                        {{ products.description|striptags|truncatechars:200 }}
+                    </p>
+                </div>
+                
+                <!-- Especificaciones -->
+                <div class="specifications mb-4">
+                    <h5 class="fw-bold mb-3">Características principales</h5>
+                    <ul class="list-unstyled">
+                        {% if products.brand %}
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Marca:</strong> {{ products.brand }}
+                        </li>
+                        {% endif %}
+                        {% if products.category %}
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Categoría:</strong> {{ products.category.name }}
+                        </li>
+                        {% endif %}
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Garantía:</strong> 12 meses
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Envío:</strong> Gratis en compras mayores a GS 200.000
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Cantidad y acciones -->
+                <div class="action-section">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <!-- Cantidad -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Cantidad</label>
+                                    <div class="input-group input-group-lg">
+                                        <button class="btn btn-outline-secondary" type="button" id="decreaseQty">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <input type="number" 
+                                               class="form-control text-center" 
+                                               id="productQty" 
+                                               value="1" 
+                                               min="1" 
+                                               max="99">
+                                        <button class="btn btn-outline-secondary" type="button" id="increaseQty">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Stock info -->
+                                <div class="col-md-6">
+                                    <div class="stock-info p-3 bg-light rounded-3">
+                                        <small class="text-muted d-block mb-1">Disponibilidad</small>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                <div class="progress-bar bg-success" style="width: 85%;"></div>
+                                            </div>
+                                            <small class="fw-bold">{{ products.stock}} unidades</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Botones de acción -->
+                                <div class="col-12">
+                                    <div class="d-grid gap-3">
+                                        <button class="btn btn-primary btn-lg py-3 fw-bold" id="addToCart">
+                                            <i class="bi bi-cart-plus me-2"></i>Agregar al carrito
+                                        </button>
+                                        
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-danger btn-lg flex-fill" id="buyNow">
+                                                <i class="bi bi-lightning-fill me-2"></i>Comprar ahora
+                                            </button>
+                                            
+                                            {% if user.is_authenticated %}
+                                            <button class="btn btn-outline-secondary btn-lg"
+                                                    id="addToWishlist"
+                                                    data-product="{{ products.id }}">
+                                                <i class="bi 
+                                                    {% if is_favorite  %}
+                                                        bi-heart-fill text-danger
+                                                    {% else %}
+                                                        bi-heart
+                                                    {% endif %}
+                                                "></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información adicional -->
+                <div class="additional-info mt-4">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-center p-3 border rounded-3">
+                                <i class="bi bi-truck text-primary fs-4 d-block mb-2"></i>
+                                <small class="text-muted d-block">Envío gratis</small>
+                                <small class="fw-bold">24-48 horas</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3 border rounded-3">
+                                <i class="bi bi-arrow-counterclockwise text-success fs-4 d-block mb-2"></i>
+                                <small class="text-muted d-block">Devolución fácil</small>
+                                <small class="fw-bold">30 días garantía</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Descripción completa -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <ul class="nav nav-tabs border-0" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#description" type="button">
+                                <i class="bi bi-file-text me-2"></i>Descripción completa
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="specs-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#specs" type="button">
+                                <i class="bi bi-list-check me-2"></i>Especificaciones
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#reviews" type="button">
+                                <i class="bi bi-star me-2"></i>Reseñas (128)
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-4">
+                    <div class="tab-content" id="productTabsContent">
+                        <!-- Descripción -->
+                        <div class="tab-pane fade show active" id="description">
+                            <div class="product-description">
+                                {{ products.description|safe }}
+                            </div>
+                        </div>
+                        
+                        <!-- Especificaciones -->
+                        <div class="tab-pane fade" id="specs">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted" style="width: 40%;">Marca</th>
+                                                <td>{{ products.brand|default:"No especificada" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">SKU</th>
+                                                <td>{{ products.sku|default:"N/A" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Categoría</th>
+                                                <td>{{ products.category.name|default:"General" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Modelo</th>
+                                                <td>{{ products.model|default:"2024" }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted" style="width: 40%;">Peso</th>
+                                                <td>1.5 kg</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Dimensiones</th>
+                                                <td>15 x 10 x 5 cm</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Material</th>
+                                                <td>{{ products.material_product }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Color</th>
+                                                <td>{{ products.color}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reseñas -->
+                        <div class="tab-pane fade" id="reviews">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="text-center p-4 border rounded-3">
+                                        <h2 class="fw-bold display-4">4.5</h2>
+                                        <div class="rating text-warning mb-2">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-half"></i>
+                                        </div>
+                                        <small class="text-muted">Basado en 128 reseñas</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="review-item mb-4">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <strong>Juan Pérez</strong>
+                                                <div class="rating text-warning small">
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">Hace 2 días</small>
+                                        </div>
+                                        <p class="mb-0">Excelente producto, superó mis expectativas. La calidad es excepcional y el envío llegó antes de lo esperado.</p>
+                                    </div>
+                                    <!-- Agrega más reseñas aquí -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+   
+</div>
+
+<!-- Modal de zoom -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="" id="modalImage" class="img-fluid" style="max-height: 70vh;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Cambiar imagen principal al hacer clic en miniatura
+document.querySelectorAll('.thumbnail-item').forEach(item => {
+    item.addEventListener('click', function() {
+        const imageUrl = this.getAttribute('data-image');
+        document.getElementById('mainImage').src = imageUrl;
+        document.getElementById('modalImage').src = imageUrl;
+        
+        // Remover clase active de todas las miniaturas
+        document.querySelectorAll('.thumbnail-item').forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        
+        // Agregar clase active a la miniatura clickeada
+        this.classList.add('active');
+    });
+});
+
+// Zoom de imagen
+document.getElementById('zoomBtn').addEventListener('click', function() {
+    const imageUrl = document.getElementById('mainImage').src;
+    document.getElementById('modalImage').src = imageUrl;
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+});
+
+// Control de cantidad
+document.getElementById('increaseQty').addEventListener('click', function() {
+    const input = document.getElementById('productQty');
+    let value = parseInt(input.value) || 1;
+    if (value < 99) {
+        input.value = value + 1;
+    }
+});
+
+document.getElementById('decreaseQty').addEventListener('click', function() {
+    const input = document.getElementById('productQty');
+    let value = parseInt(input.value) || 1;
+    if (value > 1) {
+        input.value = value - 1;
+    }
+});
+
+// Validar cantidad manual
+document.getElementById('productQty').addEventListener('change', function() {
+    let value = parseInt(this.value) || 1;
+    if (value < 1) this.value = 1;
+    if (value > 99) this.value = 99;
+});
+
+// Agregar al carrito
+document.getElementById('addToCart').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    const productId = "{{ products.id }}";
+    const quantity = document.getElementById('productQty').value;
+    const productName = "{{ products.title|escapejs }}";
+    
+    // Mostrar loading
+    const originalText = this.innerHTML;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Agregando...';
+    this.disabled = true;
+    
+    // Enviar petición AJAX
+    $.ajax({
+        type: 'POST',
+        url: "{% url 'cart_add' %}",
+        data: {
+            product_id: productId,
+            product_qty: quantity,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(response) {
+            // Restaurar botón
+            document.getElementById('addToCart').innerHTML = originalText;
+            document.getElementById('addToCart').disabled = false;
+            
+            // Mostrar notificación
+            showNotification(`¡"${productName}" agregado al carrito!`, 'success');
+            
+            // Actualizar contador del carrito si existe
+            if (response.qty) {
+                $('.cart-count').text(response.qty);
+            }
+        },
+        error: function(xhr) {
+            // Restaurar botón
+            document.getElementById('addToCart').innerHTML = originalText;
+            document.getElementById('addToCart').disabled = false;
+            
+            showNotification('Error al agregar producto al carrito', 'error');
+        }
+    });
+
+   
+});
+
+// FAVORITOS
+document.getElementById('addToWishlist').addEventListener('click', function() {
+
+    const productId = this.getAttribute('data-product');
+    const icon = this.querySelector('i');
+    const button = this;
+
+    $.ajax({
+    type: 'POST',
+    url: "{% url 'toggle_favorite' %}",
+    data: {
+        product_id: productId,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+    },
+    success: function(response) {
+
+        if (response.status === 'added') {
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill', 'text-danger');
+        }
+
+        if (response.status === 'removed') {
+            icon.classList.remove('bi-heart-fill', 'text-danger');
+            icon.classList.add('bi-heart');
+        }
+
+        if (response.status === 'login_required') {
+            showNotification('Debes iniciar sesión', 'error');
+        }
+    },
+    error: function() {
+        showNotification('Error en el servidor', 'error');
+    }
+    });
+
+});
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 'alert-info';
+    
+    const notification = $(`
+        <div class="alert ${alertClass} alert-dismissible fade show position-fixed"
+             style="top: 20px; right: 20px; z-index: 1050; min-width: 300px;">
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 
+                          type === 'error' ? 'bi-exclamation-circle-fill' : 'bi-info-circle-fill'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    setTimeout(() => notification.alert('close'), 3000);
+}
+
+// Wishlist
+document.getElementById('addToWishlist').addEventListener('click', function() {
+    this.classList.toggle('text-danger');
+    if (this.classList.contains('text-danger')) {
+        showNotification('Producto agregado a favoritos', 'success');
+    } else {
+        showNotification('Producto removido de favoritos', 'info');
+    }
+});
+
+// Comprar ahora
+document.getElementById('buyNow').addEventListener('click', function() {
+    // Primero agregar al carrito, luego redirigir al checkout
+    const productId = "{{ products.id }}";
+    const quantity = document.getElementById('productQty').value;
+    
+    $.ajax({
+        type: 'POST',
+        url: "{% url 'cart_add' %}",
+        data: {
+            product_id: productId,
+            product_qty: quantity,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(response) {
+            // Redirigir al carrito
+            window.location.href = "{% url 'cart' %}";
+        },
+        error: function(xhr) {
+            showNotification('Error al procesar la compra', 'error');
+        }
+    });
+});
+</script>
+
+<style>
+/* Estilos personalizados */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+}
+
+.product-gallery .main-image {
+    background: #f8f9fa;
+}
+
+.thumbnail-item {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.thumbnail-item:hover {
+    border-color: #0d6efd;
+    transform: translateY(-2px);
+}
+
+.thumbnail-item.active {
+    border-color: #0d6efd;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.rating i {
+    font-size: 1rem;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.product-description img {
+    max-width: 100%;
+    height: auto;
+}
+
+.product-description table {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.product-description h1, 
+.product-description h2, 
+.product-description h3, 
+.product-description h4, 
+.product-description h5, 
+.product-description h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.product-description ul, 
+.product-description ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.product-description p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-image img {
+        height: 300px !important;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+    
+    .display-6 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,617 @@
+{% extends 'helper/base.html' %}
+{% load price_filters cart_extrags %}
+
+{% block content %}
+<!-- Hero Header -->
+<header class="bg-gradient-danger text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent p-0 mb-3">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white-50">Inicio</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">Carrito</li>
+                    </ol>
+                </nav>
+                <h1 class="display-4 fw-bold mb-3">🛒 Mi Carrito</h1>
+                <p class="lead mb-0">Revisa y gestiona los productos que deseas comprar</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="bg-white text-danger rounded-4 p-4 shadow">
+                    <i class="bi bi-basket display-4 d-block mb-2"></i>
+                    <h4 class="fw-bold mb-1">{{ cart_products|length }} Items</h4>
+                    <small class="text-muted">En tu carrito</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container py-5">
+    {% if cart_products %}
+    <div class="row">
+        <!-- Lista de productos -->
+        <div class="col-lg-8">
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold h4">Productos seleccionados</h2>
+                <a href="{% url 'home' %}" class="btn btn-outline-danger">
+                    <i class="bi bi-plus-circle me-2"></i>Seguir comprando
+                </a>
+            </div>
+
+            <!-- Productos -->
+            {% for product in cart_products %}
+            <div class="card product-card mb-4 border-0 shadow-sm" id="product-{{ product.id }}">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <!-- Imagen -->
+                        <div class="col-md-2 col-4">
+                            <div class="position-relative">
+                                <img src="{{ product.url_image_one_product.url }}" 
+                                     class="img-fluid rounded-3" 
+                                     alt="{{ product.title }}"
+                                     style="height: 120px; object-fit: cover; width: 100%;">
+                                {% if product.promotion and product.sale_price %}
+                                <span class="badge bg-danger position-absolute top-0 start-0 m-2">
+                                    <i class="bi bi-percent"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Información del producto -->
+                        <div class="col-md-6 col-8">
+                            <h5 class="fw-bold mb-1">{{ product.title }}</h5>
+                            <p class="text-muted small mb-2" style="height: 40px; overflow: hidden;">
+                                {{ product.description|striptags|truncatechars:80 }}
+                            </p>
+                            
+                            <!-- Precio -->
+                            <div class="d-flex align-items-center">
+                                {% if product.promotion and product.sale_price %}
+                                <div>
+                                    <span class="text-decoration-line-through text-muted small">
+                                        GS {{ product.price|guarani }}
+                                    </span>
+                                    <h5 class="fw-bold text-danger mb-0">
+                                        GS {{ product.sale_price|guarani }}
+                                    </h5>
+                                </div>
+                                <span class="badge bg-danger bg-opacity-10 text-danger ms-3">
+                                    -{{ product.discount_percentage|default:"25" }}%
+                                </span>
+                                {% else %}
+                                <h5 class="fw-bold text-dark mb-0" id="price-{{ product.id }}" data-price="{{ product.price }}">
+                                    GS {{ product.price|guarani }}
+                                </h5>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Cantidad y acciones -->
+                        <div class="col-md-4 mt-3 mt-md-0">
+                            <div class="d-flex flex-column gap-3">
+                                <!-- Selector de cantidad -->
+                                <div>
+                                    <label class="form-label fw-semibold small mb-2">
+                                        <i class="bi bi-hash me-1"></i>Cantidad
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <button class="btn btn-outline-secondary decrease-qty" 
+                                                type="button" 
+                                                data-product-id="{{ product.id }}">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <input type="number" 
+                                               class="form-control text-center quantity-input"
+                                               id="qty-{{ product.id }}"
+                                               value="{{ quantities|get_item:product.id|default:'1' }}" 
+                                               min="1" 
+                                               max="99"
+                                               data-product-id="{{ product.id }}">
+                                        <button class="btn btn-outline-secondary increase-qty" 
+                                                type="button" 
+                                                data-product-id="{{ product.id }}">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Subtotal -->
+                                <div>
+                                    <small class="text-muted">Subtotal</small>
+                                    <h6 class="fw-bold text-success subtotal" 
+                                        id="subtotal-{{ product.id }}">
+                                        {% with subtotal=product.price|multiply:quantities|get_item:product.id %}
+                                        GS {{ subtotal|guarani }}
+                                        {% endwith %}
+                                    </h6>
+                                </div>
+
+                                <!-- Acciones -->
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-success btn-sm flex-fill update-cart"
+                                            data-product-id="{{ product.id }}">
+                                        <i class="bi bi-check-circle me-1"></i>Actualizar
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm delete-product"
+                                            data-product-id="{{ product.id }}"
+                                            title="Eliminar producto">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Resumen del pedido -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 20px;">
+                <!-- Card resumen -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-header bg-white border-0 pt-4">
+                        <h4 class="fw-bold text-center mb-0">
+                            <i class="bi bi-receipt me-2"></i>Resumen del Pedido
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Desglose -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Subtotal</span>
+                                <span class="fw-semibold" id="summary-subtotal">
+                                    GS {{ totals|guarani }}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Envío</span>
+                                <span class="fw-semibold">
+                                    <span id="shipping-cost">GS 0</span>
+                                    <small class="text-success ms-2">
+                                        <i class="bi bi-check-circle-fill"></i> Gratis
+                                    </small>
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Descuento</span>
+                                <span class="fw-semibold text-success" id="summary-discount">
+                                    - GS 0
+                                </span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5 class="fw-bold">Total</h5>
+                                <h4 class="fw-bold text-success" id="summary-total">
+                                    GS {{ totals|guarani }}
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Código promocional -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">¿Tienes un cupón?</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Código promocional">
+                                <button class="btn btn-outline-danger" type="button">
+                                    Aplicar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-grid gap-3">
+                            <button class="btn btn-danger btn-lg py-3 fw-bold" id="whatsapp-btn">
+                                <i class="bi bi-whatsapp me-2"></i>Finalizar por WhatsApp
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Continuar Comprando
+                            </a>
+                        </div>
+
+                        <!-- Métodos de pago -->
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <p class="text-muted small mb-2">Contáctanos para finalizar tu compra</p>
+                            <div class="d-flex justify-content-center gap-3">
+                                <i class="bi bi-whatsapp fs-4 text-success"></i>
+                                <i class="bi bi-telephone fs-4 text-primary"></i>
+                                <i class="bi bi-envelope fs-4 text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos recomendados (solo si hay productos en el carrito) -->
+    {% if recommended_products %}
+    <div class="mt-5 pt-5 border-top">
+        <h3 class="fw-bold mb-4">🛍️ Te podría interesar</h3>
+        <div class="row g-4">
+            {% for product in recommended_products %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card recommended-card border-0 shadow-sm h-100">
+                    <!-- Imagen del producto -->
+                    <div class="position-relative overflow-hidden" style="height: 200px;">
+                        {% if product.url_image_one_product %}
+                        <img src="{{ product.url_image_one_product.url }}" 
+                             class="card-img-top h-100 w-100" 
+                             alt="{{ product.title }}"
+                             style="object-fit: cover;">
+                        {% else %}
+                        <div class="h-100 w-100 bg-light d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Badge si está en oferta -->
+                        {% if product.promotion and product.sale_price %}
+                        <span class="badge bg-danger position-absolute top-0 start-0 m-2">
+                            <i class="bi bi-percent me-1"></i>Oferta
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información del producto -->
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title fw-bold mb-2" style="height: 48px; overflow: hidden;">
+                            {{ product.title|truncatechars:50 }}
+                        </h6>
+                        
+                        <!-- Precio -->
+                        <div class="mb-3">
+                            {% if product.promotion and product.sale_price %}
+                            <div class="d-flex align-items-center">
+                                <span class="text-danger fw-bold fs-5">
+                                    GS {{ product.sale_price|guarani }}
+                                </span>
+                                <span class="text-muted text-decoration-line-through small ms-2">
+                                    GS {{ product.price|guarani }}
+                                </span>
+                            </div>
+                            <small class="text-success">
+                                <i class="bi bi-percent me-1"></i>
+                                ¡En oferta especial!
+                            </small>
+                            {% else %}
+                            <span class="text-dark fw-bold fs-5">
+                                GS {{ product.price|guarani }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div class="d-grid gap-2 mt-auto">
+                            <button class="btn btn-outline-danger btn-sm add-to-cart-recommended"
+                                    data-product-id="{{ product.id }}">
+                                <i class="bi bi-cart-plus me-1"></i>Agregar al carrito
+                            </button>
+                            {% if product.id %}
+                            <a href="{% url 'products' product.uid %}" 
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-info-circle me-1"></i>Ver detalles
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Carrito vacío -->
+    <div class="text-center py-5 my-5">
+        <div class="empty-cart-icon mb-4">
+            <i class="bi bi-cart-x display-1 text-muted"></i>
+        </div>
+        <h2 class="fw-bold mb-3">Tu carrito está vacío</h2>
+        <p class="text-muted mb-4">Agrega productos desde nuestro catálogo para comenzar tu compra</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'home' %}" class="btn btn-danger btn-lg px-5">
+                <i class="bi bi-shop me-2"></i>Ir a la tienda
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Formateador de moneda
+function formatPYG(value) {
+    return new Intl.NumberFormat('es-PY').format(value);
+}
+
+// Obtener el precio del producto
+function getProductPrice(productId) {
+    // Buscar el precio en los elementos
+    const priceElement = $(`#price-${productId}`);
+    if (priceElement.length) {
+        // Si tiene data-price, usarlo
+        if (priceElement.data('price')) {
+            return parseFloat(priceElement.data('price'));
+        }
+        // Si no, extraer del texto
+        const priceText = priceElement.text().replace('GS ', '').replace(/\./g, '');
+        return parseFloat(priceText) || 0;
+    }
+    
+    // Si es producto en oferta
+    const salePriceElement = $(`#product-${productId} .fw-bold.text-danger`);
+    if (salePriceElement.length) {
+        const salePriceText = salePriceElement.text().replace('GS ', '').replace(/\./g, '');
+        return parseFloat(salePriceText) || 0;
+    }
+    
+    return 0;
+}
+
+// Actualizar subtotal del producto (LOCAL - sin AJAX)
+function updateSubtotalLocal(productId, quantity) {
+    const price = getProductPrice(productId);
+    const subtotal = price * quantity;
+    $(`#subtotal-${productId}`).text(`GS ${formatPYG(subtotal)}`);
+    updateSummary();
+}
+
+// Actualizar resumen del carrito
+function updateSummary() {
+    let subtotal = 0;
+    $('.subtotal').each(function() {
+        const text = $(this).text().replace('GS ', '').replace(/\./g, '');
+        subtotal += parseInt(text) || 0;
+    });
+    
+    $('#summary-subtotal').text(`GS ${formatPYG(subtotal)}`);
+    $('#summary-total').text(`GS ${formatPYG(subtotal)}`);
+}
+
+// Incrementar cantidad (LOCAL)
+$(document).on('click', '.increase-qty', function(e) {
+    e.preventDefault();
+    const productId = $(this).data('product-id');
+    const input = $(`#qty-${productId}`);
+    let value = parseInt(input.val()) || 1;
+    if (value < 99) {
+        input.val(value + 1);
+        updateSubtotalLocal(productId, value + 1);
+        showNotification('Cantidad aumentada', 'success');
+    }
+});
+
+// Decrementar cantidad (LOCAL)
+$(document).on('click', '.decrease-qty', function(e) {
+    e.preventDefault();
+    const productId = $(this).data('product-id');
+    const input = $(`#qty-${productId}`);
+    let value = parseInt(input.val()) || 1;
+    if (value > 1) {
+        input.val(value - 1);
+        updateSubtotalLocal(productId, value - 1);
+        showNotification('Cantidad reducida', 'success');
+    }
+});
+
+// Cambio manual de cantidad (LOCAL)
+$(document).on('change', '.quantity-input', function(e) {
+    e.preventDefault();
+    const productId = $(this).data('product-id');
+    const value = parseInt($(this).val()) || 1;
+    
+    // Validar rango
+    if (value < 1) {
+        $(this).val(1);
+        updateSubtotalLocal(productId, 1);
+    } else if (value > 99) {
+        $(this).val(99);
+        updateSubtotalLocal(productId, 99);
+    } else {
+        updateSubtotalLocal(productId, value);
+    }
+    
+    showNotification('Cantidad actualizada', 'success');
+});
+
+// Actualizar producto en servidor (AJAX)
+$(document).on('click', '.update-cart', function(e) {
+    e.preventDefault();
+    const productId = $(this).data('product-id');
+    const quantity = $(`#qty-${productId}`).val();
+    
+    $.ajax({
+        type: 'POST',
+        url: "{% url 'cart_update' %}",
+        data: {
+            product_id: productId,
+            product_qty: quantity,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(response) {
+            // Actualizar subtotal del producto
+            const price = parseFloat(response.product_price) || getProductPrice(productId);
+            const subtotal = price * quantity;
+            $(`#subtotal-${productId}`).text(`GS ${formatPYG(subtotal)}`);
+            updateSummary();
+            
+            showNotification('Carrito actualizado en el servidor', 'success');
+        },
+        error: function(xhr) {
+            showNotification('Error al actualizar carrito', 'error');
+        }
+    });
+});
+
+// Eliminar producto
+$(document).on('click', '.delete-product', function(e) {
+    e.preventDefault();
+    const productId = $(this).data('product-id');
+    const productName = $(this).closest('.product-card').find('h5').text().trim();
+    
+    if (confirm(`¿Estás seguro de eliminar "${productName}" del carrito?`)) {
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'cart_delete' %}",
+            data: {
+                product_id: productId,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: 'post'
+            },
+            success: function(response) {
+                $(`#product-${productId}`).fadeOut(300, function() {
+                    $(this).remove();
+                    if ($('.product-card').length === 0) {
+                        location.reload();
+                    }
+                    updateSummary();
+                });
+                showNotification('Producto eliminado del carrito', 'success');
+            },
+            error: function(xhr) {
+                showNotification('Error al eliminar producto', 'error');
+            }
+        });
+    }
+});
+
+// Botón de WhatsApp
+$('#whatsapp-btn').on('click', function() {
+    const phone = '595976477397';
+    let message = '🛒 *PEDIDO DESDE COMPRAYA* 🛒\n\n';
+    message += 'Hola, estoy interesado en los siguientes productos:\n\n';
+    
+    let total = 0;
+    $('.product-card').each(function() {
+        const title = $(this).find('h5').text();
+        const quantity = $(this).find('.quantity-input').val();
+        const subtotal = $(this).find('.subtotal').text();
+        const priceElement = $(this).find('.fw-bold.text-dark, .fw-bold.text-danger').first();
+        const price = priceElement.text();
+        
+        message += `*${title}*\n`;
+        message += `Cantidad: ${quantity}\n`;
+        message += `Precio unitario: ${price}\n`;
+        message += `Subtotal: ${subtotal}\n\n`;
+        
+        // Sumar al total
+        const subtotalNum = parseFloat(subtotal.replace('GS ', '').replace(/\./g, '')) || 0;
+        total += subtotalNum;
+    });
+    
+    message += `--------------------------------\n`;
+    message += `*TOTAL A PAGAR: GS ${formatPYG(total)}*\n\n`;
+    message += `*Datos del cliente:*\n`;
+    message += `Nombre: [Tu nombre aquí]\n`;
+    message += `Teléfono: [Tu teléfono]\n`;
+    message += `Dirección: [Tu dirección]\n\n`;
+    message += `¿Cuál es el siguiente paso?`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+
+    //https://wa.me/595976477397?text=Hola, estoy interesado en los siguientes productos
+    
+    window.open(whatsappUrl, '_blank');
+});
+
+// Mostrar notificación
+function showNotification(message, type = 'info') {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 'alert-info';
+    
+    const notification = $(`
+        <div class="alert ${alertClass} alert-dismissible fade show position-fixed"
+             style="top: 20px; right: 20px; z-index: 1050; min-width: 300px;">
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 
+                          type === 'error' ? 'bi-exclamation-circle-fill' : 'bi-info-circle-fill'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    setTimeout(() => notification.alert('close'), 3000);
+}
+
+// Inicializar
+$(document).ready(function() {
+    // Calcular subtotales iniciales
+    $('.product-card').each(function() {
+        const productId = $(this).attr('id').replace('product-', '');
+        const quantity = parseInt($(`#qty-${productId}`).val()) || 1;
+        updateSubtotalLocal(productId, quantity);
+    });
+    
+    updateSummary();
+});
+</script>
+
+<style>
+/* Estilos personalizados */
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.product-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.quantity-input {
+    max-width: 70px;
+}
+
+.sticky-top {
+    position: sticky;
+}
+
+.empty-cart-icon {
+    opacity: 0.5;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #b21f2d 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.product-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .product-card .row > div {
+        margin-bottom: 15px;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+    }
+}
+</style>
+
+{% endblock %}

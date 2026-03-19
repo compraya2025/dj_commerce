@@ -1,0 +1,57 @@
+{% extends 'helper/base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h2 class="mb-4">❤️ Mis Productos Favoritos</h2>
+
+    {% if favorites %}
+
+        <div class="row">
+            {% for favorite in favorites %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+
+                        <!-- Imagen -->
+                        {% if favorite.product.url_image_one_product %}
+                            <img src="{{ favorite.product.url_image_one_product.url }}"
+                                 class="card-img-top"
+                                 style="height:250px; object-fit:contain;">
+                        {% endif %}
+
+                        <div class="card-body">
+
+                            <!-- Título -->
+                            <h5 class="card-title">
+                                {{ favorite.product.title }}
+                            </h5>
+
+                            <!-- Precio -->
+                            <p class="text-success fw-bold">
+                                GS {{ favorite.product.final_price }}
+                            </p>
+
+                            <!-- Botón ver producto -->
+                            <a href="{% url 'product_detail' favorite.product.id %}"
+                               class="btn btn-primary btn-sm">
+                                Ver Producto
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+
+        <div class="alert alert-info">
+            No tienes productos en favoritos todavía.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

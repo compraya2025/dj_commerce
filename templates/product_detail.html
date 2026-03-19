@@ -1,0 +1,105 @@
+{% extends 'helper/base.html' %}
+{% load price_filters cart_extrags %}
+
+
+{% block content %}
+
+    {% if user.is_authenticated %}
+    <div class="container py-5">
+
+        <div class="row g-5 align-items-center">
+
+            <!-- IMAGEN -->
+            <div class="col-md-6 text-center">
+
+                {% if products.url_image_one_product %}
+                    <img src="{{ products.url_image_one_product.url }}"
+                        class="img-fluid rounded shadow"
+                        alt="{{ products.title }}"
+                        style="max-height:450px; object-fit:contain;">
+                {% else %}
+                    <div class="bg-light p-5 rounded">
+                        <span class="text-muted">Sin imagen disponible</span>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- INFORMACIÓN -->
+            <div class="col-md-6">
+
+                <!-- TÍTULO -->
+                <h1 class="fw-bold mb-3">
+                    {{ products.title }}
+                </h1>
+
+                <!-- SKU -->
+                <p class="text-muted mb-2">
+                    SKU: {{ products.sku }}
+                </p>
+
+                <!-- PRECIO -->
+                <div class="mb-3">
+
+                    {% if products.promotion and products.sale_price %}
+
+                        <h3 class="text-danger fw-bold">
+                            GS {{ products.price|guarani }}
+                        </h3>
+
+                        <p class="text-muted text-decoration-line-through">
+                            GS {{ products.price|guarani }}
+                        </p>
+
+                    {% else %}
+
+                        <h3 class="fw-bold">
+                            GS {{ products.price|guarani }}
+                        </h3>
+
+                    {% endif %}
+
+                </div>
+
+                <!-- STOCK -->
+                <p>
+                    {% if products.stock > 0 %}
+                        <span class="text-success">
+                            ✔ En stock ({{ products.stock }})
+                        </span>
+                    {% else %}
+                        <span class="text-danger">
+                            ❌ Sin stock
+                        </span>
+                    {% endif %}
+                </p>
+
+                <!-- BOTÓN FAVORITO -->
+                {% if user.is_authenticated %}
+                    <button type="button"
+                            id="addToWishlist"
+                            data-product="{{ products.id }}"
+                            class="btn btn-outline-danger mt-3">
+
+                        <i class="bi 
+                            {% if is_favorite %}
+                                bi-heart-fill text-danger
+                            {% else %}
+                                bi-heart
+                            {% endif %}
+                        "></i>
+
+                        Favorito
+
+                    </button>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+    {% endif %}
+
+{% endblock %}
+

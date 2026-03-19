@@ -49,6 +49,7 @@ LOCAL_APP = [
 ]
 
 THIRD_PARTY_APPS = [
+    
     'ckeditor',
 ]
 

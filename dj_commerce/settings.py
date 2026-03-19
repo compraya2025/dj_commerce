@@ -50,6 +50,7 @@ LOCAL_APP = [
 
 THIRD_PARTY_APPS = [
     'ckeditor',
+    
 ]
 
 INSTALLED_APPS = DJANGO_APP + LOCAL_APP + THIRD_PARTY_APPS

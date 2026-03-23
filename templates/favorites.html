@@ -1,5 +1,5 @@
 {% extends 'helper/base.html' %}
-
+{% load price_filters cart_extrags %}
 {% block content %}
 
 <div class="container py-5">
@@ -29,11 +29,11 @@
 
                             <!-- Precio -->
                             <p class="text-success fw-bold">
-                                GS {{ favorite.product.final_price }}
+                                GS {{ favorite.product.final_price|guarani }}
                             </p>
 
                             <!-- Botón ver producto -->
-                            <a href="{% url 'product_detail' favorite.product.id %}"
+                            <a href="{% url 'product_detail' favorite.product.uid %}"
                                class="btn btn-primary btn-sm">
                                 Ver Producto
                             </a>

@@ -225,12 +225,12 @@ def toggle_favorite(request):
     if request.method == 'POST':
 
         product_id = request.POST.get('product_id')
-        print(product_id)
+        print('productos',product_id)
 
         if not product_id:
             return JsonResponse({'status': 'error', 'message': 'No product id'}, status=400)
 
-        product = get_object_or_404(Product, id=product_id)
+        product = get_object_or_404(Product, uid=product_id)
 
         favorite, created = Favorite.objects.get_or_create(
             user=request.user,
@@ -245,8 +245,8 @@ def toggle_favorite(request):
 
     return JsonResponse({'status': 'invalid_request'}, status=400)
 
-def product_detail(request, id):
-    product = Product.objects.get(id=id)
+def product_detail(request, uid):
+    product = Product.objects.get(uid=uid)
 
     is_favorite = False
 

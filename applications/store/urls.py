@@ -33,7 +33,7 @@ urlpatterns = [
 
     #FAVORITOS
     path('favorite/toggle/', views.toggle_favorite, name='toggle_favorite'),
-    path('products/<int:id>/', views.product_detail, name='product_detail'),
+    path('products/<uuid:uid>/', views.product_detail, name='product_detail'),
     
     path('favoritos/', views.my_favorites, name='my_favorites'),
     
